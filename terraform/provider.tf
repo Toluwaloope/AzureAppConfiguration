@@ -1,6 +1,7 @@
 terraform {
   required_version = ">= 1.6.0"
   backend "azurerm" {
+    
     resource_group_name  = "<tfstate-resource-group>"
     storage_account_name = "<tfstatestorageaccount>"
     container_name       = "<tfstate-container>"

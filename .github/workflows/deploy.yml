@@ -24,6 +24,10 @@ jobs:
       TF_WORKING_DIR: terraform
       API_PROJECT: src/Api/AzureAppConfiguration.Api.csproj
       UI_PROJECT: src/Ui/AzureAppConfiguration.Ui.csproj
+      ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
