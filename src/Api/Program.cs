@@ -33,6 +33,7 @@ if (!string.IsNullOrWhiteSpace(appConfigEndpoint))
 builder.Services.AddAzureAppConfiguration();
 builder.Services.AddFeatureManagement();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.Configure<NewSettings>(builder.Configuration.GetSection("Appsettings"));
 
 var app = builder.Build();
 // Middleware triggers refresh if cache expired or sentinel changed
@@ -46,17 +47,35 @@ app.MapGet("/api/feature", async (IFeatureManagerSnapshot featureManager) =>
 
 app.MapGet("/api/features", async (IFeatureManagerSnapshot featureManager, IConfiguration config) =>
 {
-    // Read list of feature names from App Configuration (JSON array)
-    var namesJson = config["AppConfiguration:Features"] ?? "[]";
-    string[] featureNames;
-    try
+    // Supports both:
+    // 1) plain string value: AppConfiguration:Features = "[\"A\",\"B\"]"
+    // 2) JSON content type value flattened as section children: AppConfiguration:Features:0, :1, ...
+    var featureSection = config.GetSection("AppConfiguration:Features");
+    var featureNames = featureSection
+        .GetChildren()
+        .Select(child => child.Value)
+        .Where(value => !string.IsNullOrWhiteSpace(value))
+        .Cast<string>()
+        .ToArray();
+
+    if (featureNames.Length == 0)
     {
-        featureNames = JsonSerializer.Deserialize<string[]>(namesJson) ?? Array.Empty<string>();
+        var namesJson = config["AppConfiguration:Features"] ?? "[]";
+        try
+        {
+            featureNames = JsonSerializer.Deserialize<string[]>(namesJson) ?? Array.Empty<string>();
+        }
+        catch
+        {
+            featureNames = Array.Empty<string>();
+        }
     }
-    catch
-    {
-        featureNames = Array.Empty<string>();
-    }
+
+    featureNames = featureNames
+        .Where(name => !string.IsNullOrWhiteSpace(name))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
     var statuses = new Dictionary<string, bool>();
     foreach (var name in featureNames)
         statuses[name] = await featureManager.IsEnabledAsync(name);
