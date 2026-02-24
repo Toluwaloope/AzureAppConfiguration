@@ -100,7 +100,7 @@ resource "azurerm_service_plan" "plan" {
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
-  sku_name            = "P1v3"
+  sku_name            = "S1"
 }
 
 resource "azurerm_linux_web_app" "api" {
