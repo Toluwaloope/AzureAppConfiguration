@@ -1,61 +1,32 @@
 @page
 @model IndexModel
 
-<h2>Feature Flags (from API)</h2>
-<ul id="flags">
-    <li>Loading...</li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-    <li></li>
-</ul>
 <div class="container">
-    <div class="header">
-        <h2>Feature Flags</h2>
-        <div class="controls">
-            <button class="btn" id="refresh">Refresh</button>
-            <label class="btn"><input type="checkbox" id="autorefresh" checked /> Auto refresh</label>
-        </div>
-    </div>
-    <ul id="flags" class="flag-list">
-        <li class="flag"><span class="name">Loading...</span><span class="badge disabled">...</span></li>
-    </ul>
-    <p style="margin-top:1rem;color:#666;">Source: @Model.ApiBaseUrl/api/features</p>
-    <p style="color:#666;">Flags update every ~5s (server) and on refresh.</p>
-</div>
+    <h2>Dashboard</h2>
+    <p>Mode selected by API feature flag <strong>NewDashboard</strong>: <strong>@Model.DashboardKind</strong></p>
 
-<script>
-    (async function(){
-        try {
-            const resp = await fetch('@Model.ApiBaseUrl/api/features');
-            const data = await resp.json();
-            const ul = document.getElementById('flags');
-            ul.innerHTML = '';
-                Object.entries(data.features).forEach(([name, enabled]) => {
-                    const li = document.createElement('li');
-                    li.className = 'flag';
-                    const nameEl = document.createElement('span');
-                    nameEl.className = 'name';
-                    nameEl.textContent = name;
-                    const badge = document.createElement('span');
-                    badge.className = 'badge ' + (enabled ? 'enabled' : 'disabled');
-                    badge.textContent = enabled ? 'ENABLED' : 'DISABLED';
-                    li.appendChild(nameEl);
-                    li.appendChild(badge);
-                    ul.appendChild(li);
-            });
-        } catch (e) {
-            document.getElementById('status').textContent = 'Error contacting API';
-            console.error(e);
-        }
-    })();
-        document.getElementById('refresh').addEventListener('click', load);
-        const auto = document.getElementById('autorefresh');
-        let timer = setInterval(() => { if (auto.checked) load(); }, 5000);
-        auto.addEventListener('change', () => {
-            if (!auto.checked) { clearInterval(timer); }
-            else { timer = setInterval(() => { if (auto.checked) load(); }, 5000); }
-        });
-</script>
+    @if (Model.DashboardKind == "New")
+    {
+        <section>
+            <h3>New Dashboard</h3>
+            <ul>
+                <li>Live Overview</li>
+                <li>Modern Activity Feed</li>
+                <li>Advanced Insights Panel</li>
+            </ul>
+        </section>
+    }
+    else
+    {
+        <section>
+            <h3>Classic Dashboard</h3>
+            <ul>
+                <li>Summary Widgets</li>
+                <li>Recent Updates</li>
+                <li>Basic Metrics</li>
+            </ul>
+        </section>
+    }
+
+    <p style="margin-top:1rem;color:#666;">Source: @Model.ApiBaseUrl/api/dashboard-mode</p>
+</div>

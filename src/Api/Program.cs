@@ -32,23 +32,15 @@ if (!string.IsNullOrWhiteSpace(appConfigEndpoint))
 builder.Services.AddAzureAppConfiguration();
 builder.Services.AddFeatureManagement();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-app.UseSwagger();
-app.UseSwaggerUI();
 // Middleware triggers refresh if cache expired or sentinel changed
 app.UseAzureAppConfiguration();
 
 app.MapGet("/api/feature", async (IFeatureManagerSnapshot featureManager) =>
 {
     var enabled = await featureManager.IsEnabledAsync("BetaFeature");
-    var result = Results.Json(new { feature = "BetaFeature", enabled });
-    // Optional client-side caching of the response for a short duration
-    result.EnableBuffering();
-    result.Headers["Cache-Control"] = "public, max-age=30";
-    return result;
+    return Results.Json(new { feature = "BetaFeature", enabled });
 }).WithName("GetFeatureStatus");
 
 app.MapGet("/api/features", async (IFeatureManagerSnapshot featureManager, IConfiguration config) =>
@@ -67,11 +59,19 @@ app.MapGet("/api/features", async (IFeatureManagerSnapshot featureManager, IConf
     var statuses = new Dictionary<string, bool>();
     foreach (var name in featureNames)
         statuses[name] = await featureManager.IsEnabledAsync(name);
-    var result = Results.Json(new { features = statuses });
-    result.EnableBuffering();
-    result.Headers["Cache-Control"] = "public, max-age=5";
-    return result;
+    return Results.Json(new { features = statuses });
 }).WithName("GetFeaturesStatus");
+
+app.MapGet("/api/dashboard-mode", async (IFeatureManagerSnapshot featureManager) =>
+{
+    var isNewDashboardEnabled = await featureManager.IsEnabledAsync("NewDashboard");
+    return Results.Json(new
+    {
+        feature = "NewDashboard",
+        enabled = isNewDashboardEnabled,
+        dashboard = isNewDashboardEnabled ? "New" : "Classic"
+    });
+}).WithName("GetDashboardMode");
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 
