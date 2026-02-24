@@ -82,8 +82,10 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
         run: |
-          terraform apply -auto-approve -var-file="${{ inputs.environment }}.tfvars"
+          WORKSPACE="${{ inputs.environment || 'dev' }}"
+          terraform apply -auto-approve -var-file="${WORKSPACE}.tfvars"
 
       - name: Export Terraform Outputs
         id: tfout
@@ -97,12 +99,14 @@ jobs:
       - name: Build & Publish API
         run: |
           dotnet publish ${{ env.API_PROJECT }} -c Release -o api_out
-          zip -r api.zip api_out
+          cd api_out
+          zip -r ../api.zip .
 
       - name: Build & Publish UI
         run: |
           dotnet publish ${{ env.UI_PROJECT }} -c Release -o ui_out
-          zip -r ui.zip ui_out
+          cd ui_out
+          zip -r ../ui.zip .
 
       - name: Deploy API via AZ CLI Zip Deploy
         run: |
