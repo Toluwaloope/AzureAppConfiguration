@@ -1,0 +1,80 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  provision_and_deploy:
+    runs-on: ubuntu-latest
+    env:
+      TF_WORKING_DIR: AzureAppConfiguration/terraform
+      API_PROJECT: AzureAppConfiguration/src/Api/AzureAppConfiguration.Api.csproj
+      UI_PROJECT: AzureAppConfiguration/src/Ui/AzureAppConfiguration.Ui.csproj
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init & Validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform init -input=false
+          terraform validate
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve
+
+      - name: Export Terraform Outputs
+        id: tfout
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          echo "rg=$(terraform output -raw resource_group_name)" >> $GITHUB_OUTPUT
+          echo "api=$(terraform output -raw api_app_name)" >> $GITHUB_OUTPUT
+          echo "ui=$(terraform output -raw ui_app_name)" >> $GITHUB_OUTPUT
+
+      - name: Build & Publish API
+        run: |
+          dotnet publish ${{ env.API_PROJECT }} -c Release -o api_out
+          zip -r api.zip api_out
+
+      - name: Build & Publish UI
+        run: |
+          dotnet publish ${{ env.UI_PROJECT }} -c Release -o ui_out
+          zip -r ui.zip ui_out
+
+      - name: Deploy API via AZ CLI Zip Deploy
+        run: |
+          az webapp deploy \
+            --resource-group "${{ steps.tfout.outputs.rg }}" \
+            --name "${{ steps.tfout.outputs.api }}" \
+            --type zip \
+            --src-path api.zip
+
+      - name: Deploy UI via AZ CLI Zip Deploy
+        run: |
+          az webapp deploy \
+            --resource-group "${{ steps.tfout.outputs.rg }}" \
+            --name "${{ steps.tfout.outputs.ui }}" \
+            --type zip \
+            --src-path ui.zip
