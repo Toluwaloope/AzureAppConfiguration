@@ -19,7 +19,7 @@ resource "azurerm_app_configuration" "appcfg" {
   sku                 = "standard"
 }
 
-# Create a sample feature flag: BetaFeature enabled
+/* # Create a sample feature flag: BetaFeature enabled
 resource "azurerm_app_configuration_feature" "beta" {
   configuration_store_id = azurerm_app_configuration.appcfg.id
   name                    = "BetaFeature"
@@ -70,7 +70,7 @@ resource "azurerm_app_configuration_key" "feature_list" {
     "ExperimentalCheckout"
   ])
   label = var.environment
-}
+} */
 
 resource "azurerm_key_vault" "kv" {
   name                        = local.kv_name
