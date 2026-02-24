@@ -1,3 +1,3 @@
-project_name = "azure-appconfig-demo"
+project_name = "appconfig-demo"
 location = "Canada East"
 environment = "dev"
