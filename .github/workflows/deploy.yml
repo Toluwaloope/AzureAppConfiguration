@@ -83,7 +83,7 @@ jobs:
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var-file="${{ inputs.environment }}.tfvars"
 
       - name: Export Terraform Outputs
         id: tfout
