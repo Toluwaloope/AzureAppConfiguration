@@ -1,0 +1,42 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ui", "Ui", "{BBB7B94B-6E11-D9F1-7BA6-9ECA82DB22BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureAppConfiguration.Ui", "src\Ui\AzureAppConfiguration.Ui.csproj", "{CC424B52-9E71-B78E-ACD8-7F3B80176ACA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{81034408-37C8-1011-444E-4C15C2FADA8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureAppConfiguration.Api", "src\Api\AzureAppConfiguration.Api.csproj", "{375834B7-369F-A8A5-C4E2-1FF9E4802FE6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC424B52-9E71-B78E-ACD8-7F3B80176ACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC424B52-9E71-B78E-ACD8-7F3B80176ACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC424B52-9E71-B78E-ACD8-7F3B80176ACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC424B52-9E71-B78E-ACD8-7F3B80176ACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{375834B7-369F-A8A5-C4E2-1FF9E4802FE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{375834B7-369F-A8A5-C4E2-1FF9E4802FE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{375834B7-369F-A8A5-C4E2-1FF9E4802FE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{375834B7-369F-A8A5-C4E2-1FF9E4802FE6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BBB7B94B-6E11-D9F1-7BA6-9ECA82DB22BF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{CC424B52-9E71-B78E-ACD8-7F3B80176ACA} = {BBB7B94B-6E11-D9F1-7BA6-9ECA82DB22BF}
+		{81034408-37C8-1011-444E-4C15C2FADA8E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{375834B7-369F-A8A5-C4E2-1FF9E4802FE6} = {81034408-37C8-1011-444E-4C15C2FADA8E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0FCADE3F-DEB5-4B4B-8966-04E4D33B1F20}
+	EndGlobalSection
+EndGlobal
