@@ -53,27 +53,26 @@
 
     <p class="source">Source: @Model.ApiBaseUrl/api/dashboard-mode</p>
 
-    <section class="panel key-check-panel">
-        <h3>MY_API_KEY Verification</h3>
-        <p>Compares UI and API diagnostics without exposing the full key.</p>
-        <div class="key-check-grid">
-            <div>
-                <h4>UI</h4>
-                <p>Has value: <strong>@Model.UiKeyHasValue</strong></p>
-                <p>Length: <strong>@Model.UiKeyLength</strong></p>
-                <p>Preview: <strong>@Model.UiKeyPreview</strong></p>
-                <p>Fingerprint: <strong>@Model.UiKeyFingerprint</strong></p>
-            </div>
-            <div>
-                <h4>API</h4>
-                <p>Has value: <strong>@Model.ApiKeyHasValue</strong></p>
-                <p>Length: <strong>@Model.ApiKeyLength</strong></p>
-                <p>Preview: <strong>@Model.ApiKeyPreview</strong></p>
-                <p>Fingerprint: <strong>@Model.ApiKeyFingerprint</strong></p>
-            </div>
-        </div>
-        <p class="key-check-result @(Model.KeyFingerprintMatch ? "match" : "mismatch")">
-            Fingerprint match: <strong>@Model.KeyFingerprintMatch</strong>
-        </p>
+    <section class="panel feature-list-panel">
+        <h3>Available Features</h3>
+        <p>Loaded from <strong>@Model.ApiBaseUrl/api/features</strong>.</p>
+        @if (Model.AvailableFeatures.Any())
+        {
+            <ul class="feature-list">
+                @foreach (var feature in Model.AvailableFeatures.OrderBy(f => f.Key))
+                {
+                    <li>
+                        <span>@feature.Key</span>
+                        <span class="feature-state @(feature.Value ? "enabled" : "disabled")">
+                            @(feature.Value ? "Enabled" : "Disabled")
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No features were returned from the API.</p>
+        }
     </section>
 </div>
