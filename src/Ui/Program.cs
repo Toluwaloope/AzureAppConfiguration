@@ -15,6 +15,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.MapGet("/", () => Results.Redirect("/index.html"));
 app.MapRazorPages();
 
 app.Run();

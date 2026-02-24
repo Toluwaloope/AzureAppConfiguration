@@ -1,54 +1,75 @@
 # Azure App Configuration Demo
 
-This sample creates a .NET solution with a UI (Razor Pages) and a Backend (ASP.NET Core API). The backend uses Azure App Configuration for Feature Flags, and sensitive settings are retrieved via Azure Key Vault references at deployment. Terraform provisions all Azure resources, and a GitHub Actions workflow deploys infra and apps.
+Sample .NET 8 solution with:
+- `src/Api`: ASP.NET Core minimal API
+- `src/Ui`: Razor Pages UI
+- `terraform/`: Azure infrastructure (App Configuration, Key Vault, App Service plan, Linux Web Apps)
+- `.github/workflows/deploy.yml`: infra + app deployment workflow
 
-## Structure
-- src/Ui: ASP.NET Core Razor Pages UI
-- src/Api: ASP.NET Core Web API using Feature Flags
-- terraform/: Azure infrastructure (App Configuration, Key Vault, Linux Web Apps, RG)
-- .github/workflows/deploy.yml: CI/CD for Terraform + App deployments
+The API uses Azure App Configuration for feature flags and both API/UI consume `MY_API_KEY` through Key Vault references in App Service settings.
 
-## Runtime Sequence Diagram
-```mermaid
-sequenceDiagram
-	autonumber
-	participant U as User Browser
-	participant UI as UI Web App (Razor Pages)
-	participant API as API Web App
-	participant ACF as Azure App Configuration
-	participant KV as Azure Key Vault
+## Current Features
 
-	U->>UI: Open web page
-	UI-->>U: Render page + API endpoint config
+### 1) Dashboard mode toggle (`NewDashboard`)
+- API endpoint `GET /api/dashboard-mode` checks feature flag `NewDashboard`.
+- API returns `dashboard: "New"` or `"Classic"`.
+- UI reads that value and renders one of two distinct dashboard layouts/styles.
 
-	U->>API: GET /api/feature or /api/features
-	API->>ACF: Read feature flags (Managed Identity)
-	ACF-->>API: Feature values (+ sentinel metadata)
+### 2) `MY_API_KEY` verification (API + UI)
+- API endpoint `GET /api/my-api-key-check` returns safe diagnostics only:
+  - `hasValue`
+  - `length`
+  - masked `preview`
+  - short SHA-256 `fingerprint`
+- UI computes the same diagnostics for its own `MY_API_KEY` and compares fingerprints.
+- UI page shows `Fingerprint match: True/False` for quick verification.
 
-	alt Cache expired or sentinel changed
-		API->>ACF: Refresh configuration
-		ACF-->>API: Updated keys/flags
-	end
+### 3) UI route support for `/index.html`
+- Razor route convention maps `/index.html` to the `Index` page.
 
-	API->>KV: Resolve secret reference (if needed)
-	KV-->>API: Secret value
+## API Endpoints
+- `GET /api/health`
+- `GET /api/feature`
+- `GET /api/features`
+- `GET /api/dashboard-mode`
+- `GET /api/my-api-key-check`
 
-	API-->>U: JSON response with feature states
-```
+## Infrastructure Notes (Terraform)
+- API App Service settings include:
+  - `APP_CONFIG_ENDPOINT`
+  - `MY_API_KEY` (Key Vault reference)
+- UI App Service settings include:
+  - `API_BASE_URL`
+  - `MY_API_KEY` (Key Vault reference)
 
-## Prerequisites
-- Azure subscription and Service Principal creds for CI (`AZURE_CREDENTIALS`)
-- GitHub Actions runner permissions
+## CI/CD (GitHub Actions)
+Workflow uses OIDC federated login (not `AZURE_CREDENTIALS`).
 
-## Deploy
-1. Configure repository secret `AZURE_CREDENTIALS` with Service Principal JSON (from `az ad sp create-for-rbac`).
-2. Push to `main` or run the `Deploy` workflow manually.
-3. Workflow runs Terraform to provision infra, then builds and deploys UI and API.
+Required repository secrets:
+- `AZURE_CLIENT_ID`
+- `AZURE_TENANT_ID`
+- `AZURE_SUBSCRIPTION_ID`
+
+Required repository variables for Terraform backend:
+- `TF_STATE_RESOURCE_GROUP`
+- `TF_STATE_STORAGE_ACCOUNT`
+- `TF_STATE_CONTAINER`
+- `TF_STATE_KEY`
+
+Run deployment from GitHub Actions with `workflow_dispatch` and environment input (`dev` or `prod`).
 
 ## Local Run
+
+### API
 ```bash
 dotnet run --project src/Api/AzureAppConfiguration.Api
+```
+
+### UI
+```bash
 dotnet run --project src/Ui/AzureAppConfiguration.Ui
 ```
-# AzureAppConfiguration
-Enabling application features using Azure App Configuration
+
+Optional local environment variables:
+- API: `APP_CONFIG_ENDPOINT`, `MY_API_KEY`
+- UI: `API_BASE_URL`, `MY_API_KEY`

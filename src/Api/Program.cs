@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Microsoft.FeatureManagement;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,45 @@ app.MapGet("/api/dashboard-mode", async (IFeatureManagerSnapshot featureManager)
     });
 }).WithName("GetDashboardMode");
 
+app.MapGet("/api/my-api-key-check", () =>
+{
+    var apiKey = Environment.GetEnvironmentVariable("MY_API_KEY") ?? string.Empty;
+    var hasValue = !string.IsNullOrWhiteSpace(apiKey);
+    return Results.Json(new
+    {
+        hasValue,
+        length = apiKey.Length,
+        preview = GetMaskedPreview(apiKey),
+        fingerprint = GetFingerprint(apiKey)
+    });
+}).WithName("GetMyApiKeyCheck");
+
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 
 app.Run();
+
+static string GetMaskedPreview(string value)
+{
+    if (string.IsNullOrEmpty(value))
+    {
+        return "(empty)";
+    }
+
+    if (value.Length <= 8)
+    {
+        return "****";
+    }
+
+    return $"{value[..4]}...{value[^4..]}";
+}
+
+static string GetFingerprint(string value)
+{
+    if (string.IsNullOrEmpty(value))
+    {
+        return "(none)";
+    }
+
+    var hash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(value));
+    return Convert.ToHexString(hash)[..12];
+}

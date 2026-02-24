@@ -158,6 +158,7 @@ resource "azurerm_linux_web_app" "ui" {
 
   app_settings = {
     "API_BASE_URL" = "https://${azurerm_linux_web_app.api.default_hostname}"
+    "MY_API_KEY"   = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.api_key.id})"
   }
 }
 
