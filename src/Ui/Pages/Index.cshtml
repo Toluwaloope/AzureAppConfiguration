@@ -1,32 +1,55 @@
 @page
 @model IndexModel
 
-<div class="container">
-    <h2>Dashboard</h2>
-    <p>Mode selected by API feature flag <strong>NewDashboard</strong>: <strong>@Model.DashboardKind</strong></p>
+<div class="container dashboard @(Model.DashboardKind == "New" ? "dashboard-new" : "dashboard-classic")">
+    <div class="dashboard-header">
+        <h2>Dashboard</h2>
+        <span class="dashboard-kind">@Model.DashboardKind</span>
+    </div>
+    <p class="dashboard-subtitle">Mode selected by API feature flag <strong>NewDashboard</strong>.</p>
 
     @if (Model.DashboardKind == "New")
     {
-        <section>
-            <h3>New Dashboard</h3>
-            <ul>
-                <li>Live Overview</li>
-                <li>Modern Activity Feed</li>
-                <li>Advanced Insights Panel</li>
-            </ul>
+        <section class="dashboard-grid">
+            <article class="panel panel-hero">
+                <h3>New Dashboard</h3>
+                <p>Modern layout with prioritized insights and recent activity.</p>
+            </article>
+            <article class="panel">
+                <h4>Live Overview</h4>
+                <p>Traffic and system trends in real time.</p>
+            </article>
+            <article class="panel">
+                <h4>Activity Feed</h4>
+                <p>Recent app events and status updates.</p>
+            </article>
+            <article class="panel">
+                <h4>Insights</h4>
+                <p>Suggested actions based on current usage signals.</p>
+            </article>
         </section>
     }
     else
     {
-        <section>
-            <h3>Classic Dashboard</h3>
-            <ul>
-                <li>Summary Widgets</li>
-                <li>Recent Updates</li>
-                <li>Basic Metrics</li>
-            </ul>
+        <section class="dashboard-stack">
+            <article class="panel panel-hero">
+                <h3>Classic Dashboard</h3>
+                <p>Familiar card stack for simple review and quick checks.</p>
+            </article>
+            <article class="panel">
+                <h4>Summary Widgets</h4>
+                <p>Core totals and key status indicators.</p>
+            </article>
+            <article class="panel">
+                <h4>Recent Updates</h4>
+                <p>Latest changes with timestamps.</p>
+            </article>
+            <article class="panel">
+                <h4>Basic Metrics</h4>
+                <p>Requests, uptime, and response health.</p>
+            </article>
         </section>
     }
 
-    <p style="margin-top:1rem;color:#666;">Source: @Model.ApiBaseUrl/api/dashboard-mode</p>
+    <p class="source">Source: @Model.ApiBaseUrl/api/dashboard-mode</p>
 </div>
