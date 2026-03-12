@@ -229,6 +229,7 @@ resource "azurerm_key_vault_access_policy" "api_kv" {
   object_id    = azurerm_linux_web_app.api.identity[0].principal_id
 
   secret_permissions = ["Get", "List", "Set", "Delete"]
+  depends_on = [ azurerm_linux_web_app.api ]
 }
 
 resource "azurerm_key_vault_access_policy" "ui_kv" {
@@ -237,4 +238,6 @@ resource "azurerm_key_vault_access_policy" "ui_kv" {
   object_id    = azurerm_linux_web_app.ui.identity[0].principal_id
 
   secret_permissions = ["Get", "List", "Set", "Delete"]
+
+  depends_on = [ azurerm_linux_web_app.ui ]
 }
