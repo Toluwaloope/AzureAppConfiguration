@@ -140,6 +140,28 @@ main {
 	margin-top: 1rem;
 }
 
+.sample-image-panel {
+	margin-top: 1rem;
+}
+
+.sample-image-frame {
+	margin-top: 0.75rem;
+	border: 1px solid #d1d5db;
+	border-radius: 10px;
+	background: #ffffff;
+	padding: 0.75rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 140px;
+}
+
+.sample-image {
+	max-width: 100%;
+	height: auto;
+	image-rendering: auto;
+}
+
 .feature-list {
 	list-style: none;
 	padding: 0;

@@ -75,4 +75,16 @@
             <p>No features were returned from the API.</p>
         }
     </section>
+
+    <section class="panel sample-image-panel">
+        <h3>Sample Image</h3>
+        <p>Loaded from <strong>@Model.ApiBaseUrl/api/sample-image</strong>.</p>
+        <div class="sample-image-frame">
+            <img
+                src="@Model.ApiBaseUrl/api/sample-image"
+                alt="Sample image from API blob storage"
+                class="sample-image"
+                loading="lazy" />
+        </div>
+    </section>
 </div>

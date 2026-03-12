@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Azure.Storage.Blobs;
 using Microsoft.FeatureManagement;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -105,6 +106,45 @@ app.MapGet("/api/my-api-key-check", () =>
         fingerprint = GetFingerprint(apiKey)
     });
 }).WithName("GetMyApiKeyCheck");
+
+app.MapGet("/api/sample-image", async (IConfiguration config) =>
+{
+    var connectionString = config["Storage:ConnectionString"];
+    var containerName = config["Storage:ContainerName"];
+    var blobName = config["Storage:SampleBlobName"];
+
+    if (string.IsNullOrWhiteSpace(connectionString) ||
+        string.IsNullOrWhiteSpace(containerName) ||
+        string.IsNullOrWhiteSpace(blobName))
+    {
+        return Results.Problem(
+            title: "Storage configuration missing",
+            detail: "One or more storage settings are not available from Azure App Configuration.",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+
+    try
+    {
+        var containerClient = new BlobContainerClient(connectionString, containerName);
+        var blobClient = containerClient.GetBlobClient(blobName);
+
+        if (!await blobClient.ExistsAsync())
+        {
+            return Results.NotFound(new { message = "Sample image blob was not found." });
+        }
+
+        var response = await blobClient.DownloadStreamingAsync();
+        var contentType = response.Value.Details.ContentType;
+        return Results.Stream(response.Value.Content, contentType ?? "image/png");
+    }
+    catch
+    {
+        return Results.Problem(
+            title: "Blob fetch failed",
+            detail: "The API failed to fetch the sample image from Azure Blob Storage.",
+            statusCode: StatusCodes.Status502BadGateway);
+    }
+}).WithName("GetSampleImage");
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 

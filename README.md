@@ -27,17 +27,30 @@ The API uses Azure App Configuration for feature flags and both API/UI consume `
 ### 3) UI route support for `/index.html`
 - Razor route convention maps `/index.html` to the `Index` page.
 
+### 4) Sample PNG from Blob Storage (runtime config)
+- Terraform creates a Storage Account and uploads `terraform/assets/sample.png` to a private blob container.
+- Terraform saves these values in Azure App Configuration:
+  - `Storage:ConnectionString`
+  - `Storage:ContainerName`
+  - `Storage:SampleBlobName`
+- API endpoint `GET /api/sample-image` reads those keys from App Configuration at runtime and streams the PNG.
+
 ## API Endpoints
 - `GET /api/health`
 - `GET /api/feature`
 - `GET /api/features`
 - `GET /api/dashboard-mode`
 - `GET /api/my-api-key-check`
+- `GET /api/sample-image`
 
 ## Infrastructure Notes (Terraform)
 - API App Service settings include:
   - `APP_CONFIG_ENDPOINT`
   - `MY_API_KEY` (Key Vault reference)
+- App Configuration key-values now include storage settings used by the API at runtime:
+  - `Storage:ConnectionString`
+  - `Storage:ContainerName`
+  - `Storage:SampleBlobName`
 - UI App Service settings include:
   - `API_BASE_URL`
   - `MY_API_KEY` (Key Vault reference)
