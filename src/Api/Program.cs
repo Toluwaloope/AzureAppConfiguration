@@ -34,7 +34,6 @@ if (!string.IsNullOrWhiteSpace(appConfigEndpoint))
 builder.Services.AddAzureAppConfiguration();
 builder.Services.AddFeatureManagement();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.Configure<NewSettings>(builder.Configuration.GetSection("Appsettings"));
 
 var app = builder.Build();
 // Middleware triggers refresh if cache expired or sentinel changed

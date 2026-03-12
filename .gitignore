@@ -52,3 +52,38 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Terraform generated files
+.terraform/
+.terraform.lock.hcl
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Variable files that may contain sensitive data or local configurations
+# It is a best practice to not commit these files.
+*.tfvars
+*.tfvars.json
+# Example of a common specific variable file to ignore:
+# example.tfvars
+
+# Override files, which are used for local testing and generally not committed
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan files
+# If you use a consistent naming convention for plan output files, ignore them here
+*tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Terragrunt cache
+.terragrunt-cache/

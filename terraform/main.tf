@@ -1,6 +1,6 @@
 locals {
   rg_name     = "${var.project_name}-${var.environment}-rg"
-  appcfg_name = "${var.project_name}-${var.environment}-appcfg"
+  appcfg_name = "${var.project_name}-${var.environment}-appcnfg"
   kv_name     = "${var.project_name}${var.environment}kv"
   plan_name   = "${var.project_name}-${var.environment}-plan"
   api_name    = "${var.project_name}-${var.environment}-api"
@@ -143,8 +143,8 @@ resource "azurerm_key_vault" "kv" {
     tenant_id               = data.azurerm_client_config.current.tenant_id
     object_id               = data.azurerm_client_config.current.object_id
     key_permissions         = ["Get", "List"]
-    secret_permissions      = ["Get", "List", "Set", "Delete"]
-    certificate_permissions = ["Get", "List"]
+    secret_permissions      = ["Get", "List", "Set", "Delete", "Purge", "Recover", "Backup", "Restore"]
+    certificate_permissions = ["Get", "List", "ManageContacts"]
   }
 }
 
@@ -155,11 +155,6 @@ resource "random_password" "api_key" {
   special = true
 }
 
-resource "azurerm_key_vault_secret" "api_key" {
-  name         = "my-api-key"
-  value        = random_password.api_key.result
-  key_vault_id = azurerm_key_vault.kv.id
-}
 
 resource "azurerm_service_plan" "plan" {
   name                = local.plan_name
@@ -189,7 +184,6 @@ resource "azurerm_linux_web_app" "api" {
   app_settings = {
     # UI will use this base URL; also the API uses APP_CONFIG_ENDPOINT for App Configuration RBAC access
     "APP_CONFIG_ENDPOINT" = azurerm_app_configuration.appcfg.endpoint
-    "MY_API_KEY"          = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.api_key.id})"
   }
 }
 
@@ -211,7 +205,6 @@ resource "azurerm_linux_web_app" "ui" {
 
   app_settings = {
     "API_BASE_URL" = "https://${azurerm_linux_web_app.api.default_hostname}"
-    "MY_API_KEY"   = azurerm_key_vault_secret.api_key.value
   }
 }
 
