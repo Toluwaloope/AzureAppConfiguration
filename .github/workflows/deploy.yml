@@ -64,19 +64,19 @@ jobs:
           terraform init -input=false
           terraform validate
 
-      - name: Terraform Workspace Setup
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        shell: bash
-        run: |
-          WORKSPACE="${{ inputs.environment || 'dev' }}"
-          if terraform workspace select "$WORKSPACE" 2>/dev/null; then
-            echo "Selected existing workspace: $WORKSPACE"
-          else
-            echo "Creating new workspace: $WORKSPACE"
-            terraform workspace new "$WORKSPACE"
-          fi
+      # - name: Terraform Workspace Setup
+      #   working-directory: ${{ env.TF_WORKING_DIR }}
+      #   shell: bash
+      #   run: |
+      #     WORKSPACE="${{ inputs.environment || 'dev' }}"
+      #     if terraform workspace select "$WORKSPACE" 2>/dev/null; then
+      #       echo "Selected existing workspace: $WORKSPACE"
+      #     else
+      #       echo "Creating new workspace: $WORKSPACE"
+      #       terraform workspace new "$WORKSPACE"
+      #     fi
           
-          echo "Current workspace: $(terraform workspace show)"
+      #     echo "Current workspace: $(terraform workspace show)"
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
