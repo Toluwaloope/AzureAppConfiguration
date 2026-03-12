@@ -1,11 +1,11 @@
 terraform {
   required_version = ">= 1.6.0"
   backend "azurerm" {
-    
-    resource_group_name  = "<tfstate-resource-group>"
-    storage_account_name = "<tfstatestorageaccount>"
-    container_name       = "<tfstate-container>"
-    key                  = "appconfig-demo-dev.tfstate"
+
+    resource_group_name  = "toluwaloope-demo-tfstate-rg"
+    storage_account_name = "toluwaloopetfstatestg"
+    container_name       = "tfstate"
+    key                  = "appconfig-demo.tfstate"
   }
   required_providers {
     azurerm = {

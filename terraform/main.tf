@@ -1,10 +1,16 @@
 locals {
-  rg_name        = "${var.project_name}-${var.environment}-rg"
-  appcfg_name    = "${var.project_name}-${var.environment}-appcfg"
-  kv_name        = "${var.project_name}${var.environment}kv"
-  plan_name      = "${var.project_name}-${var.environment}-plan"
-  api_name       = "${var.project_name}-${var.environment}-api"
-  ui_name        = "${var.project_name}-${var.environment}-ui"
+  rg_name     = "${var.project_name}-${var.environment}-rg"
+  appcfg_name = "${var.project_name}-${var.environment}-appcfg"
+  kv_name     = "${var.project_name}${var.environment}kv"
+  plan_name   = "${var.project_name}-${var.environment}-plan"
+  api_name    = "${var.project_name}-${var.environment}-api"
+  ui_name     = "${var.project_name}-${var.environment}-ui"
+}
+
+resource "random_string" "storage_suffix" {
+  length  = 6
+  special = false
+  upper   = false
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -19,7 +25,54 @@ resource "azurerm_app_configuration" "appcfg" {
   sku                 = "standard"
 }
 
-/* # Create a sample feature flag: BetaFeature enabled
+resource "azurerm_storage_account" "files" {
+  name                     = substr(lower(replace("${var.project_name}${var.environment}st${random_string.storage_suffix.result}", "-", "")), 0, 24)
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  allow_nested_items_to_be_public = false
+  min_tls_version                 = "TLS1_2"
+}
+
+resource "azurerm_storage_container" "samples" {
+  name                  = "samples"
+  storage_account_name  = azurerm_storage_account.files.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_blob" "sample_png" {
+  name                   = "sample.png"
+  storage_account_name   = azurerm_storage_account.files.name
+  storage_container_name = azurerm_storage_container.samples.name
+  type                   = "Block"
+  source                 = "${path.module}/assets/sample.png"
+  content_type           = "image/png"
+}
+
+resource "azurerm_app_configuration_key" "storage_connection_string" {
+  configuration_store_id = azurerm_app_configuration.appcfg.id
+  key                    = "Storage:ConnectionString"
+  value                  = azurerm_storage_account.files.primary_connection_string
+
+  depends_on = [azurerm_storage_account.files]
+}
+
+resource "azurerm_app_configuration_key" "storage_container_name" {
+  configuration_store_id = azurerm_app_configuration.appcfg.id
+  key                    = "Storage:ContainerName"
+  value                  = azurerm_storage_container.samples.name
+}
+
+resource "azurerm_app_configuration_key" "storage_sample_blob_name" {
+  configuration_store_id = azurerm_app_configuration.appcfg.id
+  key                    = "Storage:SampleBlobName"
+  value                  = azurerm_storage_blob.sample_png.name
+}
+
+/* 
+# Create a sample feature flag: BetaFeature enabled
 resource "azurerm_app_configuration_feature" "beta" {
   configuration_store_id = azurerm_app_configuration.appcfg.id
   name                    = "BetaFeature"
@@ -73,24 +126,24 @@ resource "azurerm_app_configuration_key" "feature_list" {
 } */
 
 resource "azurerm_key_vault" "kv" {
-  name                        = local.kv_name
-  location                    = var.location
-  resource_group_name         = azurerm_resource_group.rg.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = true
+  name                       = local.kv_name
+  location                   = var.location
+  resource_group_name        = azurerm_resource_group.rg.name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
+  soft_delete_retention_days = 7
+  purge_protection_enabled   = true
 
-    network_acls {
-    bypass = "AzureServices"
+  network_acls {
+    bypass         = "AzureServices"
     default_action = "Allow"
   }
 
   access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-    key_permissions    = ["Get", "List"]
-    secret_permissions = ["Get", "List", "Set", "Delete"]
+    tenant_id               = data.azurerm_client_config.current.tenant_id
+    object_id               = data.azurerm_client_config.current.object_id
+    key_permissions         = ["Get", "List"]
+    secret_permissions      = ["Get", "List", "Set", "Delete"]
     certificate_permissions = ["Get", "List"]
   }
 }
