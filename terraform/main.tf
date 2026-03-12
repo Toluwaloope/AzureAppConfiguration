@@ -142,7 +142,7 @@ resource "azurerm_key_vault" "kv" {
   access_policy {
     tenant_id               = data.azurerm_client_config.current.tenant_id
     object_id               = data.azurerm_client_config.current.object_id
-    key_permissions         = ["Get", "List","Set", "Delete"]
+    key_permissions         = ["Get", "List"]
     secret_permissions      = ["Get", "List", "Set", "Delete"]
     certificate_permissions = ["Get", "List"]
   }
@@ -228,7 +228,7 @@ resource "azurerm_key_vault_access_policy" "api_kv" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_linux_web_app.api.identity[0].principal_id
 
-  secret_permissions = ["Get", "List", "Set", "Delete"]
+  secret_permissions = ["Get", "List"]
   depends_on = [ azurerm_linux_web_app.api ]
 }
 
@@ -237,7 +237,7 @@ resource "azurerm_key_vault_access_policy" "ui_kv" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_linux_web_app.ui.identity[0].principal_id
 
-  secret_permissions = ["Get", "List", "Set", "Delete"]
+  secret_permissions = ["Get", "List"]
 
   depends_on = [ azurerm_linux_web_app.ui ]
 }
